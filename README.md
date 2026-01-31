@@ -74,4 +74,4 @@ The engine avoids "pure randomness" in favor of structured noise. Every tile $(x
 ---
 
 Made by **Satoru Suzuki**
-> "The Dao that can be mapped is not the eternal Dao; yet, one must start the journey somewhere."
+> "The Dao that can be mapped is not the eternal Dao. Yet, one must start the journey somewhere."
