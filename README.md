@@ -1,77 +1,67 @@
-# 🌌 Xianxia Infinite Realm: Procedural Map Engine
+# ⛩️ Xianxia: Infinite Realm Map Engine
 
-A lightweight, high-performance procedural terrain and settlement generator built entirely in vanilla **HTML5, CSS3, and JavaScript**. This engine simulates a vast, infinite cultivation world ("Xianxia") using fractal noise, multi-layered biome logic, and a persistent "Divine Sense" notebook system.
+**Made by Satoru Suzuki**
 
-Designed as a modular core for future RPGs or browser-based cultivation games, it allows users to traverse an endless world where geography is dictated by the flow of **Qi**, **Elevation**, and **Moisture**.
+A high-performance, single-file procedural world engine designed for cultivation RPGs and immortal-hero exploration games. This engine simulates a boundless world of spirit mountains and ancient sects where every tile represents a **10x10 km area**, governed by complex Qi and elemental noise layers.
 
----
-
-## ✨ Key Features
-
-* **Infinite Procedural Generation:** Uses Fractal Brownian Motion (fbm) and Bilinear Interpolation to generate seamless terrain on the fly.
-* **Triple-Layer Biome Logic:** Terrain is determined by the intersection of three distinct values:
-    * **Elevation (e):** Determines the transition from Abyssal Seas to Heavenly Peaks.
-    * **Moisture (m):** Dictates the presence of Dune Seas (deserts) or Deep Forests.
-    * **Qi Density (q):** A low-frequency noise layer that triggers rare biomes like Jade Forests or determines if a peak becomes a Volcano.
-* **Settlement Engine:** Intelligent placement of Imperial Capitals, Sects, Fortresses, and Villages.
-    * **Context-Awareness:** Port Cities only spawn on coastal tiles that are directly adjacent to water.
-* **The Ledger (Scribe Edict):** A coordinate-based persistent notebook. Players can record the "Dao" of a specific location, leaving notes that are saved to the local session ledger.
-* **Responsive "Mobile-First" Design:** Optimized for both desktop (Keyboard/WASD) and mobile (D-Pad) interaction with a sleek, dark cultivation-themed UI.
+Inspired by the "cultivation" genre of web novels and games, this tool provides a foundation for building infinite wuxia-style exploration without the overhead of heavy game engines.
 
 ---
 
-## 🛠 Technical Deep Dive
+## ☯️ The Path of the Dao
 
-### The World-Gen Algorithm
-The engine avoids "pure randomness" in favor of structured noise. Every tile $(x, y)$ is a result of a deterministic seed-based hash.
+Unlike standard random generators, the Xianxia Engine uses **Triple-Layer Noise Abstraction** to determine the environment:
 
-1.  **Smoothing:** Uses a quintic curve for interpolation to prevent "blocky" artifacts common in basic noise generators.
-2.  **Octaves:** The `fbm` function layers multiple frequencies of noise, creating realistic "jagged" coastlines and mountain ranges rather than simple smooth blobs.
-3.  **The "Triple Gate" Check:** Rare biomes use complex logic. For example, a **Jade Forest** requires high Moisture ($m > 0.65$), mid-range Elevation ($0.45 < e < 0.7$), and a high Qi threshold ($q > 0.75$).
+1.  **Elevation ($e$):** Determines the physical landscape, from abyssal oceanic trenches to the highest heavenly peaks.
+2.  **Moisture ($m$):** A humidity layer that dictates the difference between the golden Dune Seas and the deep, canopied forests.
+3.  **Qi Intensity ($q$):** Represents the spiritual flux of the land. High $q$ values create **Jade Forests** or **Volcanoes**, while low $q$ values result in more mundane plains.
 
-### Script Constants
-* **Scale (0.04):** Set to simulate a vast "10km per tile" feel.
-* **Seed:** A 6-digit seed (100000–899999) that can be manually reset via reincarnation.
+---
+
+## ✨ Key Features 
+
+* **🌐 Infinite Procedural Exploration:** Uses **Fractal Brownian Motion (FBM)** with 4 octaves to ensure natural terrain transitions across infinite coordinates.
+* **⛩️ Sacred Settlements:** Features an intelligent spawning system for **Sects**, **Imperial Capitals**, and **Fortresses** based on regional habitability.
+* **⚓ Contextual Coastal Logic:** **Port Cities** only spawn on coastal tiles (elevation 0.35 to 0.38) that are directly adjacent to ocean tiles.
+* **📜 The Scroll of Truth:** A built-in coordinate-based ledger that allows players to "Scribe Edicts" on locations regarding spirit veins, rare herbs, or enemy sects.
+* **💾 Persistent Save System:** Integrated `localStorage` support. Your coordinates ($X, Y$), current world seed, and all scribe edicts are automatically saved and reloaded.
+* **📋 Centralized Edict Reviewer:** A dedicated interface to view all notes made across the infinite map in one chronological list for easy backtracking.
+* **🔑 Custom Seed Injection:** Cultivators can manually input and **"Load"** specific world seeds, allowing for shared exploration of specific timelines.
+* **⚙️ Unified System Dao:** A clean modal-based UI replaces the old action bar, housing world-reset, void-drifting, and log-management tools.
+* **💯 Zero-Dependency Architecture:** One single HTML file containing all Logic (JS), Styling (CSS), and Structure (HTML).
 
 ---
 
 ## 🎮 Controls
 
-### Navigation
-* **D-Pad / UI Buttons:** Use the UI arrows to move the "Divine Sense" across the grid.
-* **Keyboard:** Supports `WASD` and `Arrow Keys` for rapid exploration.
-* **Void Drift:** Teleports your consciousness thousands of miles in a random direction.
-* **Reincarnate:** Generates an entirely new universe with a new seed.
-
-### Interaction
-* **Eye Icon / Enter:** Inspect and "zoom" into the current location.
-* **Tile Click:** Open the **Notebook (Scribe Edict)** to view the biome description or record personal notes.
+* **Navigation:** Use `WASD` or `Arrow Keys` to move your divine sense across the realm.
+* **👁️ Divine Sense (Inspect):** Click your current tile to read local environmental data and scribe notes in the **Scroll of Truth**.
+* **⚙️ System Dao:** Access the system menu to save your progress, jump to new coordinates, or manage your logs.
+* **✨ Void Drift:** A "Teleport" protocol that allows you to jump thousands of kilometers to a new random coordinate.
+* **🎲 Reincarnate:** Permanently wipe current progress and generate a completely new world seed.
 
 ---
 
-## 🗺 Biome Reference
+## 🗺️ Spirit Biome Reference
 
-| Icon | Name | Description | Logic Requirement |
+| Icon | Name | Description | Logic Condition |
 | :--- | :--- | :--- | :--- |
-| 🏔️ | **Heavenly Peak** | Thin, pure air. | $e > 0.79$ |
-| 🌋 | **Volcano** | Magma flows and ash. | $e > 0.79$ & $q < 0.2$ |
-| 🎋 | **Jade Forest** | Bamboo glowing with Qi. | High Moisture + High Qi |
-| ⚓ | **Port City** | Trade hubs of the seas. | Coast ($0.35 < e < 0.38$) + Neighbor Water |
-| ⛩️ | **Sect** | Centers of cultivation. | Rare Spawn ($h > 0.960$) |
-| 🏜️ | **Dune Sea** | Endless golden sands. | Low Moisture ($m < 0.2$) |
+| 🏯 | **Imperial Capital** | A vast metropolis of millions of mortals. | Very Rare ($h > 0.992$) |
+| ⛩️ | **Spirit Sect** | A center of cultivation power and Qi. | Rare Spawn ($h > 0.960$) |
+| 🏔️ | **Heavenly Peak** | Pure air where the snow never melts. | Maximum Elevation ($e > 0.79$) |
+| 🎋 | **Jade Forest** | Bamboo groves glowing with ancient Qi. | High Moisture + High Qi |
+| 🌋 | **Volcano** | High-heat zones with unstable spiritual flux. | High Elevation + Low Qi |
+| ⚓ | **Port City** | Coastal trade hubs touching the Spirit Ocean. | Coastal Elevation + Water Neighbor |
+| 🏡 | **Village** | Humble mortal settlements. | Frequent Spawn ($h > 0.860$) |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Deployment
 
-1.  **No Installation Required:** This is a "Single File" application.
-2.  Clone the repository:
-    ```bash
-    git clone [https://github.com/your-username/xianxia-map-engine.git](https://github.com/your-username/xianxia-map-engine.git)
-    ```
-3.  Open `xiaxia-map.html` in any modern web browser.
+1.  Download the `xianxia-map.html` file.
+2.  Open it in any modern web browser.
+3.  No server, build-tools, or external assets required.
 
 ---
 
-Made by **Satoru Suzuki**
-> "The Dao that can be mapped is not the eternal Dao. Yet, one must start the journey somewhere."
+> "The Dao that can be trodden is not the eternal Dao; the name that can be named is not the eternal name."
