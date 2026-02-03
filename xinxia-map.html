@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Xianxia Infinite Realm</title>
+<style>
+    :root {
+        /* --- THEME --- */
+        --bg: #0b0f14;
+        --panel: #121923;
+        --border: #30363d;
+        --text: #e6edf3;
+        --gold: #eac54f;
+        --accent: #d2a8ff;
+        --danger: #ff6b6b;
+
+        /* --- BIOME PALETTE (Strict Identity) --- */
+        --c-void: #050d14;         /* Abyssal Sea */
+        --c-water: #0f2c45;        /* Spirit Ocean */
+        --c-coast: #1e3a2f;        /* Shallow/Coast */
+        
+        --c-plains: #1a3d1a;       /* Spirit Plains (Green) */
+        
+        --c-forest: #0d1f0d;       /* Deep Forest */
+        --c-jade: #062b21;         /* Jade Forest (Rare) */
+        
+        --c-desert: #3d341a;       /* Dune Sea (Yellow/Brown) */
+        --c-badland: #3d221a;      /* Red Wastes */
+        
+        --c-mtn: #2b2b2b;          /* Spirit Mountain */
+        --c-peak: #f0f6fc;         /* Heavenly Peak (Snow) */
+        --c-volcano: #5c1818;      /* Volcano */
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+    body {
+        margin: 0;
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        height: 100dvh; /* Mobile viewport fix */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* --- LAYOUT CONTAINER --- */
+    .game-container {
+        width: 100%;
+        max-width: 600px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        background: var(--panel);
+        position: relative;
+    }
+
+    /* --- HEADER --- */
+    .header {
+        padding: 15px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: #000;
+        flex-shrink: 0;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .coords-label { font-size: 0.6rem; color: #666; letter-spacing: 2px; font-weight: bold; margin-bottom: 2px; }
+    .coords-val { font-family: monospace; color: var(--gold); font-size: 1.2rem; font-weight: bold; text-shadow: 0 0 10px rgba(234, 197, 79, 0.2); }
+    
+    .status-box { text-align: right; }
+    .biome-name { color: var(--accent); font-weight: bold; font-size: 0.95rem; }
+
+    /* --- MAP VIEWPORT --- */
+    .map-viewport {
+        flex-grow: 1;
+        min-height: 0;
+        background: #050505;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(11, 1fr); 
+        grid-template-rows: repeat(11, 1fr);
+        width: 100%;
+        max-width: 500px;
+        aspect-ratio: 1/1;
+        gap: 0; 
+    }
+
+    /* --- TILES & ANIMATION --- */
+    .tile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(14px, 4.5vw, 24px);
+        cursor: pointer;
+        position: relative;
+        border: 0.5px solid rgba(0,0,0,0.1); 
+        transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.1s;
+        user-select: none;
+    }
+
+    .tile:hover {
+        filter: brightness(1.3);
+        z-index: 10;
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        border: 1px solid var(--accent);
+    }
+
+    .tile:active { transform: scale(0.92); filter: brightness(0.8); }
+
+    .center-tile {
+        outline: 2px solid var(--gold);
+        outline-offset: -2px;
+        z-index: 5;
+        box-shadow: inset 0 0 15px rgba(234, 197, 79, 0.4);
+    }
+
+    .tile.has-note::after {
+        content: ''; position: absolute; top: 4px; right: 4px;
+        width: 5px; height: 5px; background: var(--gold);
+        border-radius: 50%; box-shadow: 0 0 4px var(--gold);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        padding: 15px;
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        background: var(--panel);
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        z-index: 20;
+    }
+
+    .d-pad { display: grid; grid-template-columns: 60px 60px 60px; gap: 8px; }
+
+    button {
+        background: #21262d; 
+        border: 1px solid var(--border); 
+        color: var(--text);
+        padding: 12px; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-size: 18px;
+        touch-action: manipulation; 
+        transition: all 0.15s;
+    }
+    
+    button:active { 
+        background: var(--accent); 
+        color: #000; 
+        transform: translateY(2px);
+    }
+
+    .settings-btn {
+        width: 100%; max-width: 200px; font-size: 0.8rem; font-weight: bold;
+        letter-spacing: 2px; text-transform: uppercase; display: flex;
+        align-items: center; justify-content: center; gap: 8px;
+        background: #161b22; border: 1px solid #30363d;
+    }
+    
+    .footer-info {
+        font-size: 10px; color: #555; font-family: monospace; text-align: center;
+    }
+
+    /* --- MODALS (Shared) --- */
+    .modal {
+        position: absolute; bottom: 0; left: 0; right: 0; 
+        background: #0d1117; border-top: 2px solid var(--gold); padding: 20px;
+        transform: translateY(110%); 
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex; flex-direction: column; z-index: 100; 
+        box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
+        max-height: 85%;
+    }
+    .modal.active { transform: translateY(0); }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; flex-shrink: 0;}
+    .note-title { font-weight: bold; color: var(--gold); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;}
+    .note-desc { font-style: italic; color: #888; font-size: 0.85em; margin-top: 4px; }
+    
+    .close-btn { background: none; border: 1px solid #444; font-size: 10px; padding: 4px 10px; color: #888; border-radius: 12px; cursor: pointer; }
+
+    /* --- NOTEBOOK SPECIFICS --- */
+    #notebook-modal { height: 50%; }
+    textarea {
+        width: 100%; flex-grow: 1; background: #161b22; border: 1px solid var(--border);
+        color: var(--text); padding: 15px; resize: none; margin-bottom: 15px;
+        font-family: 'Courier New', Courier, monospace; outline: none; border-radius: 4px;
+    }
+    textarea:focus { border-color: var(--gold); }
+    .save-btn { background: var(--gold); color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 6px; cursor: pointer; letter-spacing: 1px; width: 100%; }
+
+    /* --- SETTINGS & LOGS SPECIFICS --- */
+    #settings-modal { height: auto; padding-bottom: 25px; }
+    #logs-modal { height: 60%; }
+
+    .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .settings-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: bold;}
+    
+    .seed-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    #custom-seed-input {
+        flex: 1; background: #050d14; border: 1px solid var(--border); color: var(--gold); 
+        font-family: monospace; padding: 10px; font-size: 1.1rem; border-radius: 4px;
+    }
+    
+    .action-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;}
+    .btn-sm { 
+        font-size: 11px; padding: 12px 5px; text-transform: uppercase; font-weight: bold; 
+        letter-spacing: 0.5px; flex: 1; background: #21262d; color: var(--text);
+        min-width: 120px;
+    }
+    
+    .btn-danger { border-bottom: 2px solid var(--danger); }
+    .btn-accent { border-bottom: 2px solid var(--accent); }
+    .btn-gold { border-bottom: 2px solid var(--gold); color: #fff; }
+    .btn-save { border-bottom: 2px solid #2ecc71; color: #fff;}
+
+    .log-list { overflow-y: auto; flex-grow: 1; border: 1px solid var(--border); background: #050505; border-radius: 4px; }
+    .log-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .log-item:last-child { border-bottom: none; }
+    .log-coords { font-family: monospace; color: var(--gold); font-weight: bold; font-size: 0.8rem; display: block; margin-bottom: 4px; }
+    .log-text { color: #ccc; font-style: italic; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;}
+    .empty-logs { padding: 20px; text-align: center; color: #666; font-style: italic; }
+
+    .credits { margin-top: 10px; font-size: 10px; color: #444; text-align: center; font-family: monospace; }
+
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="header">
+        <div>
+            <div class="coords-label">DIVINE SENSE</div>
+            <div class="coords-val" id="coords-display">0, 0</div>
+        </div>
+        <div class="status-box">
+            <div class="biome-name" id="biome-display">Initializing...</div>
+        </div>
+    </div>
+
+    <div class="map-viewport">
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="controls">
+        <div class="d-pad">
+            <div></div><button onclick="move(0, -1)">▲</button><div></div>
+            <button onclick="move(-1, 0)">◀</button>
+            <button onclick="zoom()" title="Inspect Location" style="font-size: 20px;">👁️</button> 
+            <button onclick="move(1, 0)">▶</button>
+            <div></div><button onclick="move(0, 1)">▼</button><div></div>
+        </div>
+        
+        <button class="settings-btn" onclick="toggleSettings()">
+            <span>⚙️ SYSTEM</span>
+        </button>
+
+        <div class="footer-info">
+            <span id="seed-display">Seed: 000000</span>
+        </div>
+    </div>
+</div>
+
+<div id="notebook-modal" class="modal">
+    <div class="modal-header">
+        <div>
+            <div class="note-title" id="note-title">Location Name</div>
+            <div class="note-desc" id="note-desc">Description...</div>
+        </div>
+        <button class="close-btn" onclick="closeNotebook()">CLOSE</button>
+    </div>
+    <textarea id="note-input" placeholder="Record the Dao of this location..."></textarea>
+    <button class="save-btn" onclick="saveNote()">SCRIBE EDICT</button>
+</div>
+
+<div id="logs-modal" class="modal">
+    <div class="modal-header">
+        <div class="note-title">SCROLL OF TRUTH</div>
+        <button class="close-btn" onclick="closeLogs()">CLOSE</button>
+    </div>
+    <div class="log-list" id="log-list-container"></div>
+</div>
+
+<div id="settings-modal" class="modal">
+    <div class="modal-header">
+        <div class="note-title" style="color:var(--text);">SYSTEM DAO</div>
+        <button class="close-btn" onclick="toggleSettings()">CLOSE</button>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-label">Cultivation Progress</div>
+        <div class="action-row">
+            <button class="btn-sm btn-save" id="manual-save-btn" onclick="manualSave()">💾 Save Realm</button>
+            <button class="btn-sm btn-gold" onclick="openLogs()">📜 View Edicts</button>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-label">World Seed Protocol</div>
+        <div class="seed-row">
+            <input type="number" id="custom-seed-input" placeholder="Enter Seed">
+            <button class="btn-sm" style="flex: 0 0 80px; border-bottom: 2px solid var(--gold);" onclick="applyCustomSeed()">LOAD</button>
+        </div>
+        <div style="font-size: 10px; color: #666;">Enter a custom number to generate a specific timeline.</div>
+    </div>
+
+    <div class="settings-section" style="border:none; padding-bottom: 0;">
+        <div class="settings-label">Forbidden Arts</div>
+        <div class="action-row">
+            <button class="btn-sm btn-accent" onclick="teleport()">✨ Void Drift</button>
+            <button class="btn-sm btn-danger" onclick="reincarnate()">🎲 Reincarnate</button>
+        </div>
+    </div>
+
+    <div class="credits">Made by Satoru Suzuki</div>
+</div>
+
+<script>
+    // --- 1. CORE ENGINE & SEEDING ---
+    let SEED = Math.floor(Math.random() * 899999) + 100000;
+    
+    // Player State
+    const S = { x: 0, y: 0, ledger: {} };
+
+    // SAVE SYSTEM: LOAD
+    function loadGame() {
+        try {
+            const raw = localStorage.getItem('xianxia_save');
+            if (raw) {
+                const data = JSON.parse(raw);
+                SEED = data.seed || SEED;
+                S.x = data.x || 0;
+                S.y = data.y || 0;
+                S.ledger = data.ledger || {};
+                console.log("Realm loaded.");
+            }
+        } catch (e) { console.error("Save Corrupt", e); }
+    }
+
+    // SAVE SYSTEM: MANUAL SAVE
+    function manualSave() {
+        const data = { seed: SEED, x: S.x, y: S.y, ledger: S.ledger };
+        localStorage.setItem('xianxia_save', JSON.stringify(data));
+        
+        const btn = document.getElementById('manual-save-btn');
+        const origText = btn.innerHTML;
+        btn.innerHTML = "✅ SAVED!";
+        setTimeout(() => btn.innerHTML = origText, 1500);
+    }
+
+    // Basic Hash (Pseudorandom)
+    function hash(x, y) {
+        let n = Math.sin(x * 12.9898 + y * 78.233 + SEED) * 43758.5453;
+        return n - Math.floor(n);
+    }
+
+    // Smooth Noise (Bilinear Interpolation)
+    function noise(x, y) {
+        let i = Math.floor(x);
+        let j = Math.floor(y);
+        let u = x - i;
+        let v = y - j;
+        u = u * u * u * (u * (u * 6 - 15) + 10);
+        v = v * v * v * (v * (v * 6 - 15) + 10);
+        
+        return (1-u)*(1-v)*hash(i, j) + 
+               u*(1-v)*hash(i+1, j) + 
+               (1-u)*v*hash(i, j+1) + 
+               u*v*hash(i+1, j+1);
+    }
+
+    // Fractal Brownian Motion
+    function fbm(x, y, octaves) {
+        let val = 0;
+        let amp = 0.5;
+        let freq = 1;
+        for(let i=0; i<octaves; i++){
+            val += noise(x*freq, y*freq) * amp;
+            amp *= 0.5;
+            freq *= 2;
+        }
+        return val;
+    }
+
+    // --- 2. WORLD LOGIC (PRESERVED) ---
+    
+    function getSettlement(x, y, e) {
+        let h = hash(x, y);
+        
+        // --- PORT CITY LOGIC (With Neighbor Check) ---
+        if (h > 0.98 && e >= 0.35 && e < 0.38) {
+            const scale = 0.04;
+            let n1 = fbm((x+1) * scale, y * scale, 4);
+            let n2 = fbm((x-1) * scale, y * scale, 4);
+            let n3 = fbm(x * scale, (y+1) * scale, 4);
+            let n4 = fbm(x * scale, (y-1) * scale, 4);
+            
+            if (n1 < 0.35 || n2 < 0.35 || n3 < 0.35 || n4 < 0.35) {
+                return { type: 'Port City', name: 'Port City', icon: '⚓', desc: 'Trade hub of the Seas.', isPort: true };
+            }
+        }
+
+        if (h > 0.992) return { type: 'City', name: 'Imperial Capital', icon: '🏯', desc: 'A vast metropolis of millions of people.' };
+        if (h > 0.975) return { type: 'City', name: 'City', icon: '🏙️', desc: 'A city teeming with mortals and merchants.' };
+        if (h > 0.960) return { type: 'Sect', name: 'Sect', icon: '⛩️', desc: 'A center of cultivation power.' };
+        if (h > 0.945) return { type: 'Fortress', name: 'Fortress', icon: '🏰', desc: 'A military stronghold guarding the lands.' };
+        if (h > 0.944) return { type: 'Ruins', name: 'Ruins', icon: '🛕', desc: 'Echoes of a fallen civilization.' };
+        if (h > 0.860) return { type: 'Village', name: 'Village', icon: '🏡', desc: 'A humble settlement of mortals.' };
+        
+        return null;
+    }
+
+    function getTileData(x, y) {
+        const scale = 0.04; 
+        
+        let e = fbm(x * scale, y * scale, 4);       
+        let m = fbm(x * scale + 500, y * scale + 500, 2); 
+        let q = fbm(x * 0.02 - 100, y * 0.02 - 100, 2);   
+
+        let data = { color: 'var(--c-plains)', name: 'Vast Plains', icon: '', desc: 'Vast grasslands', cssClass: '' };
+
+        if (e < 0.22) {
+            data.color = 'var(--c-void)'; data.name = 'Abyssal Sea'; data.desc = 'Crushing depths where light dies.';
+        } else if (e < 0.35) {
+            data.color = 'var(--c-water)'; data.name = 'Ocean'; data.desc = 'Endless water.';
+        } 
+        
+        else if (e > 0.79) {
+            if (q < 0.2) {
+                data.color = 'var(--c-volcano)'; data.name = 'Volcano'; data.icon = '🌋'; data.desc = 'Magma flows and ash clouds.';
+            } else {
+                data.color = 'var(--c-peak)'; data.name = 'Heavenly Peak'; data.icon = '🏔️'; data.desc = 'The air is thin and pure here.';
+            }
+        } else if (e > 0.65) {
+            data.color = 'var(--c-mtn)'; data.name = 'Spirit Mountain'; data.icon = '⛰️'; data.desc = 'Jagged ridges and hidden caves.';
+        }
+        
+        else {
+            if (m < 0.2 && e > 0.45) {
+                data.color = 'var(--c-desert)'; data.name = 'Dune Sea'; data.desc = 'Endless golden sands.';
+                if (m < 0.1) { data.color = 'var(--c-badland)'; data.name = 'Red Badlands'; }
+            }
+            else if (m > 0.65) {
+                if (q > 0.75 && e > 0.45 && e < 0.7) {
+                    data.color = 'var(--c-jade)'; data.name = 'Jade Forest'; data.desc = 'Bamboo groves glowing with ancient Qi.';
+                } else {
+                    data.color = 'var(--c-forest)'; 
+                    data.name = 'Spirit Forest'; 
+                    data.desc = 'A Forest with qi infused tres.';
+                    data.icon = '🌳';
+                }
+            }
+            else {
+                /* --- ADDED FEATURE: Spirit Groves (High Frequency Clusters) --- */
+                // This creates small 3-4 tile clusters of trees in the plains
+                let grove = noise(x * 0.5, y * 0.5); 
+                if (grove > 0.65) {
+                    data.name = 'Deep Forest';
+                    data.icon = '🌳';
+                    data.desc = 'A very deep forest.';
+                    data.color = '#1f3a1f'; 
+                }
+            }
+            
+            let s = getSettlement(x, y, e);
+            if (s) {
+                data.icon = s.icon; data.name = s.name; data.desc = s.desc;
+                if (s.isPort) data.color = 'var(--c-coast)';
+            }
+        }
+
+        return data;
+    }
+
+    // --- 3. RENDER ENGINE ---
+    const gridEl = document.getElementById('grid');
+    const coordsEl = document.getElementById('coords-display');
+    const biomeEl = document.getElementById('biome-display');
+    const seedEl = document.getElementById('seed-display');
+
+    function renderMap() {
+        gridEl.innerHTML = '';
+        const range = 5; 
+        
+        for (let y = S.y - range; y <= S.y + range; y++) {
+            for (let x = S.x - range; x <= S.x + range; x++) {
+                const data = getTileData(x, y);
+                const tile = document.createElement('div');
+                
+                tile.className = `tile ${data.cssClass}`;
+                if (x === S.x && y === S.y) tile.classList.add('center-tile');
+                if (S.ledger[`${x},${y}`]) tile.classList.add('has-note');
+
+                tile.style.backgroundColor = data.color;
+                tile.innerText = data.icon;
+                tile.onclick = () => openNotebook(x, y, data);
+                
+                gridEl.appendChild(tile);
+            }
+        }
+
+        const currentTile = getTileData(S.x, S.y);
+        coordsEl.innerText = `${S.x}, ${S.y}`;
+        biomeEl.innerText = currentTile.name;
+        seedEl.innerText = `Seed: ${SEED}`;
+    }
+
+    // --- 4. CONTROLS & UI ---
+    const noteModal = document.getElementById('notebook-modal');
+    const settingsModal = document.getElementById('settings-modal');
+    const logsModal = document.getElementById('logs-modal');
+
+    function isModalOpen() {
+        return noteModal.classList.contains('active') || 
+               settingsModal.classList.contains('active') ||
+               logsModal.classList.contains('active');
+    }
+
+    function move(dx, dy) {
+        if(isModalOpen()) return;
+        S.x += dx;
+        S.y += dy;
+        renderMap();
+    }
+
+    function zoom() {
+        if(isModalOpen()) return;
+        openNotebook(S.x, S.y, getTileData(S.x, S.y));
+    }
+
+    function toggleSettings() {
+        if (settingsModal.classList.contains('active')) {
+            settingsModal.classList.remove('active');
+        } else {
+            noteModal.classList.remove('active');
+            logsModal.classList.remove('active');
+            document.getElementById('custom-seed-input').value = SEED;
+            settingsModal.classList.add('active');
+        }
+    }
+
+    function openLogs() {
+        settingsModal.classList.remove('active');
+        const container = document.getElementById('log-list-container');
+        container.innerHTML = '';
+        
+        const entries = Object.entries(S.ledger);
+        if (entries.length === 0) {
+            container.innerHTML = '<div class="empty-logs">No edicts recorded yet.<br>Use the divine eye 👁️ to scribe notes.</div>';
+        } else {
+            entries.forEach(([key, val]) => {
+                const coords = key.split(',');
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `
+                    <span class="log-coords">COORDS: ${coords[0]}, ${coords[1]}</span>
+                    <span class="log-text">${val.replace(/</g, "&lt;")}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+        logsModal.classList.add('active');
+    }
+
+    function closeLogs() {
+        logsModal.classList.remove('active');
+        settingsModal.classList.add('active');
+    }
+
+    function applyCustomSeed() {
+        const input = document.getElementById('custom-seed-input').value;
+        if(input) {
+            if(confirm("Shifting timeline to new seed. Current location will be reset. Proceed?")) {
+                SEED = parseInt(input);
+                S.x = 0; S.y = 0; S.ledger = {}; 
+                renderMap();
+                toggleSettings();
+            }
+        }
+    }
+
+    function teleport() {
+        S.x += Math.floor((Math.random() - 0.5) * 5000);
+        S.y += Math.floor((Math.random() - 0.5) * 5000);
+        renderMap();
+        toggleSettings();
+    }
+
+    function reincarnate() {
+        if(confirm("Abandon this timeline and reincarnate into a new world?")) {
+            SEED = Math.floor(Math.random() * 899999) + 100000;
+            S.x = 0; S.y = 0; S.ledger = {};
+            renderMap();
+            toggleSettings();
+        }
+    }
+
+    // --- 5. NOTEBOOK SYSTEM ---
+    const nTitle = document.getElementById('note-title');
+    const nDesc = document.getElementById('note-desc');
+    const nInput = document.getElementById('note-input');
+    let currentEdit = {x:0, y:0};
+
+    function openNotebook(x, y, data) {
+        currentEdit = {x, y};
+        nTitle.innerText = `${data.icon || '📍'} ${data.name} (${x}, ${y})`;
+        nDesc.innerText = `${data.desc}`;
+        nInput.value = S.ledger[`${x},${y}`] || "";
+        noteModal.classList.add('active');
+    }
+
+    function saveNote() {
+        const val = nInput.value.trim();
+        const key = `${currentEdit.x},${currentEdit.y}`;
+        if (val) S.ledger[key] = val;
+        else delete S.ledger[key];
+        closeNotebook();
+        renderMap();
+    }
+
+    function closeNotebook() {
+        noteModal.classList.remove('active');
+        nInput.blur();
+    }
+
+    // --- INIT ---
+    loadGame();
+    renderMap();
+
+    document.addEventListener('keydown', (e) => {
+        if (isModalOpen()) return;
+        const k = e.key.toLowerCase();
+        if (k === 'arrowup' || k === 'w') move(0, -1);
+        if (k === 'arrowdown' || k === 's') move(0, 1);
+        if (k === 'arrowleft' || k === 'a') move(-1, 0);
+        if (k === 'arrowright' || k === 'd') move(1, 0);
+        if (k === 'enter' || k === ' ') zoom();
+    });
+
+</script>
+</body>
+</html>
