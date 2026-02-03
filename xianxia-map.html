@@ -73,7 +73,7 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
     .coords-label { font-size: 0.6rem; color: #666; letter-spacing: 2px; font-weight: bold; margin-bottom: 2px; }
-    .coords-val { font-family: monospace; color: var(--gold); font-size: 1.2rem; font-weight: bold; }
+    .coords-val { font-family: monospace; color: var(--gold); font-size: 1.2rem; font-weight: bold; text-shadow: 0 0 10px rgba(234, 197, 79, 0.2); }
     
     .status-box { text-align: right; }
     .biome-name { color: var(--accent); font-weight: bold; font-size: 0.95rem; }
@@ -97,7 +97,6 @@
         width: 100%;
         max-width: 500px;
         aspect-ratio: 1/1;
-        /* Gap 0 for seamless terrain look */
         gap: 0; 
     }
 
@@ -109,9 +108,7 @@
         font-size: clamp(14px, 4.5vw, 24px);
         cursor: pointer;
         position: relative;
-        border: 0.5px solid rgba(0,0,0,0.1); /* Subtle grid line */
-        
-        /* THE ANIMATION FEEL (from Map-Main) */
+        border: 0.5px solid rgba(0,0,0,0.1); 
         transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.1s;
         user-select: none;
     }
@@ -124,10 +121,7 @@
         border: 1px solid var(--accent);
     }
 
-    .tile:active {
-        transform: scale(0.92);
-        filter: brightness(0.8);
-    }
+    .tile:active { transform: scale(0.92); filter: brightness(0.8); }
 
     .center-tile {
         outline: 2px solid var(--gold);
@@ -136,7 +130,6 @@
         box-shadow: inset 0 0 15px rgba(234, 197, 79, 0.4);
     }
 
-    /* Edict Marker */
     .tile.has-note::after {
         content: ''; position: absolute; top: 4px; right: 4px;
         width: 5px; height: 5px; background: var(--gold);
@@ -176,46 +169,79 @@
         color: #000; 
         transform: translateY(2px);
     }
+
+    .settings-btn {
+        width: 100%; max-width: 200px; font-size: 0.8rem; font-weight: bold;
+        letter-spacing: 2px; text-transform: uppercase; display: flex;
+        align-items: center; justify-content: center; gap: 8px;
+        background: #161b22; border: 1px solid #30363d;
+    }
     
-    .action-bar { display: flex; gap: 10px; width: 100%; justify-content: center; }
-    .btn-sm { 
-        font-size: 11px; 
-        padding: 10px 15px; 
-        text-transform: uppercase; 
-        font-weight: bold; 
-        letter-spacing: 0.5px;
-        flex: 1;
-        max-width: 160px;
+    .footer-info {
+        font-size: 10px; color: #555; font-family: monospace; text-align: center;
     }
 
-    .seed-display {
-        font-size: 10px; color: #555; font-family: monospace; margin-top: 5px;
-    }
-
-    /* --- NOTEBOOK MODAL --- */
-    #notebook-modal {
-        position: absolute; bottom: 0; left: 0; right: 0; height: 55%;
+    /* --- MODALS (Shared) --- */
+    .modal {
+        position: absolute; bottom: 0; left: 0; right: 0; 
         background: #0d1117; border-top: 2px solid var(--gold); padding: 20px;
-        transform: translateY(100%); 
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); /* Apple-style spring */
+        transform: translateY(110%); 
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex; flex-direction: column; z-index: 100; 
         box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
+        max-height: 85%;
     }
-    #notebook-modal.active { transform: translateY(0); }
+    .modal.active { transform: translateY(0); }
 
-    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-    .note-title { font-weight: bold; color: var(--gold); font-size: 1.2rem; }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; flex-shrink: 0;}
+    .note-title { font-weight: bold; color: var(--gold); font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;}
     .note-desc { font-style: italic; color: #888; font-size: 0.85em; margin-top: 4px; }
     
+    .close-btn { background: none; border: 1px solid #444; font-size: 10px; padding: 4px 10px; color: #888; border-radius: 12px; cursor: pointer; }
+
+    /* --- NOTEBOOK SPECIFICS --- */
+    #notebook-modal { height: 50%; }
     textarea {
         width: 100%; flex-grow: 1; background: #161b22; border: 1px solid var(--border);
         color: var(--text); padding: 15px; resize: none; margin-bottom: 15px;
         font-family: 'Courier New', Courier, monospace; outline: none; border-radius: 4px;
     }
     textarea:focus { border-color: var(--gold); }
+    .save-btn { background: var(--gold); color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 6px; cursor: pointer; letter-spacing: 1px; width: 100%; }
+
+    /* --- SETTINGS & LOGS SPECIFICS --- */
+    #settings-modal { height: auto; padding-bottom: 25px; }
+    #logs-modal { height: 60%; }
+
+    .settings-section { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .settings-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: bold;}
     
-    .save-btn { background: var(--gold); color: #000; font-weight: bold; border: none; padding: 15px; border-radius: 6px; cursor: pointer; }
-    .close-btn { background: none; border: 1px solid #444; font-size: 11px; padding: 4px 12px; color: #888; border-radius: 12px; }
+    .seed-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    #custom-seed-input {
+        flex: 1; background: #050d14; border: 1px solid var(--border); color: var(--gold); 
+        font-family: monospace; padding: 10px; font-size: 1.1rem; border-radius: 4px;
+    }
+    
+    .action-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;}
+    .btn-sm { 
+        font-size: 11px; padding: 12px 5px; text-transform: uppercase; font-weight: bold; 
+        letter-spacing: 0.5px; flex: 1; background: #21262d; color: var(--text);
+        min-width: 120px;
+    }
+    
+    .btn-danger { border-bottom: 2px solid var(--danger); }
+    .btn-accent { border-bottom: 2px solid var(--accent); }
+    .btn-gold { border-bottom: 2px solid var(--gold); color: #fff; }
+    .btn-save { border-bottom: 2px solid #2ecc71; color: #fff;}
+
+    .log-list { overflow-y: auto; flex-grow: 1; border: 1px solid var(--border); background: #050505; border-radius: 4px; }
+    .log-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .log-item:last-child { border-bottom: none; }
+    .log-coords { font-family: monospace; color: var(--gold); font-weight: bold; font-size: 0.8rem; display: block; margin-bottom: 4px; }
+    .log-text { color: #ccc; font-style: italic; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;}
+    .empty-logs { padding: 20px; text-align: center; color: #666; font-style: italic; }
+
+    .credits { margin-top: 10px; font-size: 10px; color: #444; text-align: center; font-family: monospace; }
 
 </style>
 </head>
@@ -244,15 +270,18 @@
             <button onclick="move(1, 0)">▶</button>
             <div></div><button onclick="move(0, 1)">▼</button><div></div>
         </div>
-        <div class="action-bar">
-            <button class="btn-sm" onclick="teleport()">✨ Void Drift</button>
-            <button class="btn-sm" onclick="reincarnate()">🎲 Reincarnate</button>
+        
+        <button class="settings-btn" onclick="toggleSettings()">
+            <span>⚙️ SYSTEM</span>
+        </button>
+
+        <div class="footer-info">
+            <span id="seed-display">Seed: 000000</span>
         </div>
-        <div class="seed-display" id="seed-display">Seed: 000000</div>
     </div>
 </div>
 
-<div id="notebook-modal">
+<div id="notebook-modal" class="modal">
     <div class="modal-header">
         <div>
             <div class="note-title" id="note-title">Location Name</div>
@@ -264,13 +293,80 @@
     <button class="save-btn" onclick="saveNote()">SCRIBE EDICT</button>
 </div>
 
+<div id="logs-modal" class="modal">
+    <div class="modal-header">
+        <div class="note-title">SCROLL OF TRUTH</div>
+        <button class="close-btn" onclick="closeLogs()">CLOSE</button>
+    </div>
+    <div class="log-list" id="log-list-container"></div>
+</div>
+
+<div id="settings-modal" class="modal">
+    <div class="modal-header">
+        <div class="note-title" style="color:var(--text);">SYSTEM DAO</div>
+        <button class="close-btn" onclick="toggleSettings()">CLOSE</button>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-label">Cultivation Progress</div>
+        <div class="action-row">
+            <button class="btn-sm btn-save" id="manual-save-btn" onclick="manualSave()">💾 Save Realm</button>
+            <button class="btn-sm btn-gold" onclick="openLogs()">📜 View Edicts</button>
+        </div>
+    </div>
+
+    <div class="settings-section">
+        <div class="settings-label">World Seed Protocol</div>
+        <div class="seed-row">
+            <input type="number" id="custom-seed-input" placeholder="Enter Seed">
+            <button class="btn-sm" style="flex: 0 0 80px; border-bottom: 2px solid var(--gold);" onclick="applyCustomSeed()">LOAD</button>
+        </div>
+        <div style="font-size: 10px; color: #666;">Enter a custom number to generate a specific timeline.</div>
+    </div>
+
+    <div class="settings-section" style="border:none; padding-bottom: 0;">
+        <div class="settings-label">Forbidden Arts</div>
+        <div class="action-row">
+            <button class="btn-sm btn-accent" onclick="teleport()">✨ Void Drift</button>
+            <button class="btn-sm btn-danger" onclick="reincarnate()">🎲 Reincarnate</button>
+        </div>
+    </div>
+
+    <div class="credits">Made by Satoru Suzuki</div>
+</div>
+
 <script>
     // --- 1. CORE ENGINE & SEEDING ---
-    // Start with a random seed
     let SEED = Math.floor(Math.random() * 899999) + 100000;
     
     // Player State
     const S = { x: 0, y: 0, ledger: {} };
+
+    // SAVE SYSTEM: LOAD
+    function loadGame() {
+        try {
+            const raw = localStorage.getItem('xianxia_save');
+            if (raw) {
+                const data = JSON.parse(raw);
+                SEED = data.seed || SEED;
+                S.x = data.x || 0;
+                S.y = data.y || 0;
+                S.ledger = data.ledger || {};
+                console.log("Realm loaded.");
+            }
+        } catch (e) { console.error("Save Corrupt", e); }
+    }
+
+    // SAVE SYSTEM: MANUAL SAVE
+    function manualSave() {
+        const data = { seed: SEED, x: S.x, y: S.y, ledger: S.ledger };
+        localStorage.setItem('xianxia_save', JSON.stringify(data));
+        
+        const btn = document.getElementById('manual-save-btn');
+        const origText = btn.innerHTML;
+        btn.innerHTML = "✅ SAVED!";
+        setTimeout(() => btn.innerHTML = origText, 1500);
+    }
 
     // Basic Hash (Pseudorandom)
     function hash(x, y) {
@@ -284,8 +380,6 @@
         let j = Math.floor(y);
         let u = x - i;
         let v = y - j;
-        
-        // Quintic curve for smoother interpolation
         u = u * u * u * (u * (u * 6 - 15) + 10);
         v = v * v * v * (v * (v * 6 - 15) + 10);
         
@@ -295,12 +389,11 @@
                u*v*hash(i+1, j+1);
     }
 
-    // Fractal Brownian Motion (Octaves for detail)
+    // Fractal Brownian Motion
     function fbm(x, y, octaves) {
         let val = 0;
         let amp = 0.5;
         let freq = 1;
-        
         for(let i=0; i<octaves; i++){
             val += noise(x*freq, y*freq) * amp;
             amp *= 0.5;
@@ -309,20 +402,14 @@
         return val;
     }
 
-    // --- 2. WORLD LOGIC (THE MERGE) ---
+    // --- 2. WORLD LOGIC (PRESERVED) ---
     
-    // Helper: Determine if a tile is a Settlement
-    // FIX: Added 'e' parameter to check neighbor elevation for Port Cities
     function getSettlement(x, y, e) {
         let h = hash(x, y);
         
         // --- PORT CITY LOGIC (With Neighbor Check) ---
-        // 1. Is it rare? (h > 0.98) 
-        // 2. Is it in the coastal elevation band? (0.35 - 0.38)
         if (h > 0.98 && e >= 0.35 && e < 0.38) {
             const scale = 0.04;
-            // 3. NEIGHBOR CHECK: Is it actually touching water? (e < 0.35)
-            // We check the 4 cardinal neighbors.
             let n1 = fbm((x+1) * scale, y * scale, 4);
             let n2 = fbm((x-1) * scale, y * scale, 4);
             let n3 = fbm(x * scale, (y+1) * scale, 4);
@@ -333,7 +420,6 @@
             }
         }
 
-        // Standard Settlements
         if (h > 0.992) return { type: 'City', name: 'Imperial Capital', icon: '🏯', desc: 'A vast metropolis of millions of people.' };
         if (h > 0.975) return { type: 'City', name: 'City', icon: '🏙️', desc: 'A city teeming with mortals and merchants.' };
         if (h > 0.960) return { type: 'Sect', name: 'Sect', icon: '⛩️', desc: 'A center of cultivation power.' };
@@ -345,34 +431,21 @@
     }
 
     function getTileData(x, y) {
-        const scale = 0.04; // 10km scale feel
+        const scale = 0.04; 
         
-        // 1. GENERATE LAYERS
-        let e = fbm(x * scale, y * scale, 4);       // Elevation
-        let m = fbm(x * scale + 500, y * scale + 500, 2); // Moisture
-        let q = fbm(x * 0.02 - 100, y * 0.02 - 100, 2);   // Qi (Lower freq for vast zones)
+        let e = fbm(x * scale, y * scale, 4);       
+        let m = fbm(x * scale + 500, y * scale + 500, 2); 
+        let q = fbm(x * 0.02 - 100, y * 0.02 - 100, 2);   
 
-        // 2. BASE BIOME
-        let data = { 
-            color: 'var(--c-plains)', 
-            name: 'Vast Plains', 
-            icon: '', 
-            desc: 'Vast grasslands',
-            cssClass: ''
-        };
+        let data = { color: 'var(--c-plains)', name: 'Vast Plains', icon: '', desc: 'Vast grasslands', cssClass: '' };
 
-        // --- WATER (Logic from Zero1 + Zero11) ---
         if (e < 0.22) {
             data.color = 'var(--c-void)'; data.name = 'Abyssal Sea'; data.desc = 'Crushing depths where light dies.';
         } else if (e < 0.35) {
             data.color = 'var(--c-water)'; data.name = 'Ocean'; data.desc = 'Endless water.';
         } 
         
-        // FIX: Removed broken "Port City" block here. It is now handled in getSettlement.
-        
-        // --- MOUNTAINS (Distinct Ranges) ---
         else if (e > 0.79) {
-            // Volcano Check: High Peak but Very Unstable Qi (q < 0.2)
             if (q < 0.2) {
                 data.color = 'var(--c-volcano)'; data.name = 'Volcano'; data.icon = '🌋'; data.desc = 'Magma flows and ash clouds.';
             } else {
@@ -382,17 +455,12 @@
             data.color = 'var(--c-mtn)'; data.name = 'Spirit Mountain'; data.icon = '⛰️'; data.desc = 'Jagged ridges and hidden caves.';
         }
         
-        // --- LAND (Vegetation & Qi) ---
         else {
-            // Desert (Low M, High E to avoid beaches being deserts)
             if (m < 0.2 && e > 0.45) {
                 data.color = 'var(--c-desert)'; data.name = 'Dune Sea'; data.desc = 'Endless golden sands.';
-                // Badlands if extremely dry
                 if (m < 0.1) { data.color = 'var(--c-badland)'; data.name = 'Red Wastes'; }
             }
-            // Forests
             else if (m > 0.65) {
-                // Jade Forest: The rare "Triple Gate"
                 if (q > 0.75 && e > 0.45 && e < 0.7) {
                     data.color = 'var(--c-jade)'; data.name = 'Jade Forest'; data.desc = 'Bamboo groves glowing with ancient Qi.';
                 } else {
@@ -400,13 +468,9 @@
                 }
             }
             
-            // --- OVERLAYS: SETTLEMENTS ---
-            // Only on habitable land (Plains, Forests, Deserts)
-            // FIX: Passing 'e' to check for Port Cities
             let s = getSettlement(x, y, e);
             if (s) {
                 data.icon = s.icon; data.name = s.name; data.desc = s.desc;
-                // FIX: Force background color if it's a Port City
                 if (s.isPort) data.color = 'var(--c-coast)';
             }
         }
@@ -422,7 +486,7 @@
 
     function renderMap() {
         gridEl.innerHTML = '';
-        const range = 5; // 11x11 grid
+        const range = 5; 
         
         for (let y = S.y - range; y <= S.y + range; y++) {
             for (let x = S.x - range; x <= S.x + range; x++) {
@@ -435,50 +499,109 @@
 
                 tile.style.backgroundColor = data.color;
                 tile.innerText = data.icon;
-                
-                // Click Event
                 tile.onclick = () => openNotebook(x, y, data);
                 
                 gridEl.appendChild(tile);
             }
         }
 
-        // Update Header Info
         const currentTile = getTileData(S.x, S.y);
         coordsEl.innerText = `${S.x}, ${S.y}`;
         biomeEl.innerText = currentTile.name;
+        seedEl.innerText = `Seed: ${SEED}`;
     }
 
-    // --- 4. MOVEMENT & ACTIONS ---
+    // --- 4. CONTROLS & UI ---
+    const noteModal = document.getElementById('notebook-modal');
+    const settingsModal = document.getElementById('settings-modal');
+    const logsModal = document.getElementById('logs-modal');
+
+    function isModalOpen() {
+        return noteModal.classList.contains('active') || 
+               settingsModal.classList.contains('active') ||
+               logsModal.classList.contains('active');
+    }
+
     function move(dx, dy) {
-        if(modal.classList.contains('active')) return;
+        if(isModalOpen()) return;
         S.x += dx;
         S.y += dy;
         renderMap();
     }
 
     function zoom() {
-        if(modal.classList.contains('active')) return;
+        if(isModalOpen()) return;
         openNotebook(S.x, S.y, getTileData(S.x, S.y));
+    }
+
+    function toggleSettings() {
+        if (settingsModal.classList.contains('active')) {
+            settingsModal.classList.remove('active');
+        } else {
+            noteModal.classList.remove('active');
+            logsModal.classList.remove('active');
+            document.getElementById('custom-seed-input').value = SEED;
+            settingsModal.classList.add('active');
+        }
+    }
+
+    function openLogs() {
+        settingsModal.classList.remove('active');
+        const container = document.getElementById('log-list-container');
+        container.innerHTML = '';
+        
+        const entries = Object.entries(S.ledger);
+        if (entries.length === 0) {
+            container.innerHTML = '<div class="empty-logs">No edicts recorded yet.<br>Use the divine eye 👁️ to scribe notes.</div>';
+        } else {
+            entries.forEach(([key, val]) => {
+                const coords = key.split(',');
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `
+                    <span class="log-coords">COORDS: ${coords[0]}, ${coords[1]}</span>
+                    <span class="log-text">${val.replace(/</g, "&lt;")}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+        logsModal.classList.add('active');
+    }
+
+    function closeLogs() {
+        logsModal.classList.remove('active');
+        settingsModal.classList.add('active');
+    }
+
+    function applyCustomSeed() {
+        const input = document.getElementById('custom-seed-input').value;
+        if(input) {
+            if(confirm("Shifting timeline to new seed. Current location will be reset. Proceed?")) {
+                SEED = parseInt(input);
+                S.x = 0; S.y = 0; S.ledger = {}; 
+                renderMap();
+                toggleSettings();
+            }
+        }
     }
 
     function teleport() {
         S.x += Math.floor((Math.random() - 0.5) * 5000);
         S.y += Math.floor((Math.random() - 0.5) * 5000);
         renderMap();
+        toggleSettings();
     }
 
     function reincarnate() {
         if(confirm("Abandon this timeline and reincarnate into a new world?")) {
             SEED = Math.floor(Math.random() * 899999) + 100000;
-            seedEl.innerText = `Seed: ${SEED}`;
             S.x = 0; S.y = 0; S.ledger = {};
             renderMap();
+            toggleSettings();
         }
     }
 
     // --- 5. NOTEBOOK SYSTEM ---
-    const modal = document.getElementById('notebook-modal');
     const nTitle = document.getElementById('note-title');
     const nDesc = document.getElementById('note-desc');
     const nInput = document.getElementById('note-input');
@@ -486,10 +609,10 @@
 
     function openNotebook(x, y, data) {
         currentEdit = {x, y};
-        nTitle.innerText = `${data.icon || '📍'} ${data.name}  (${x}, ${y})`;
+        nTitle.innerText = `${data.icon || '📍'} ${data.name} (${x}, ${y})`;
         nDesc.innerText = `${data.desc}`;
         nInput.value = S.ledger[`${x},${y}`] || "";
-        modal.classList.add('active');
+        noteModal.classList.add('active');
     }
 
     function saveNote() {
@@ -498,21 +621,20 @@
         if (val) S.ledger[key] = val;
         else delete S.ledger[key];
         closeNotebook();
-        renderMap(); // Update marker
+        renderMap();
     }
 
     function closeNotebook() {
-        modal.classList.remove('active');
-        nInput.blur(); // Fix mobile keyboard
+        noteModal.classList.remove('active');
+        nInput.blur();
     }
 
-    // --- INITIALIZATION ---
-    seedEl.innerText = `Seed: ${SEED}`;
+    // --- INIT ---
+    loadGame();
     renderMap();
 
-    // Keyboard Controls
     document.addEventListener('keydown', (e) => {
-        if (modal.classList.contains('active')) return;
+        if (isModalOpen()) return;
         const k = e.key.toLowerCase();
         if (k === 'arrowup' || k === 'w') move(0, -1);
         if (k === 'arrowdown' || k === 's') move(0, 1);
